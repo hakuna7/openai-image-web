@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI 生图控制台</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel form-panel">
+        <div class="eyebrow">OpenAI Image Web</div>
+        <h1>用你的 API Key 直接生图</h1>
+        <p class="intro">
+          这个页面把请求发给你本机的 Node 服务，再由服务去调用 OpenAI 图片接口。
+          这样比把 Key 直接写进前端更安全。
+        </p>
+
+        <form id="image-form">
+          <label id="apiKeyField" class="field">
+            <span>API Key</span>
+            <input
+              id="apiKey"
+              name="apiKey"
+              type="password"
+              placeholder="sk-..."
+              autocomplete="off"
+            />
+          </label>
+
+          <p id="serverKeyHint" class="server-key-hint hidden">
+            当前服务端已配置 API Key，你可以直接生图，不需要在网页里再填写。
+          </p>
+
+          <label class="field">
+            <span>提示词</span>
+            <textarea
+              id="prompt"
+              name="prompt"
+              rows="7"
+              placeholder="例如：一只戴着银色耳机的橘猫，坐在霓虹雨夜的便利店门口，电影感构图，超细节"
+              required
+            ></textarea>
+          </label>
+
+          <div class="grid">
+            <label class="field">
+              <span>尺寸</span>
+              <select id="size" name="size">
+                <option value="1024x1024">1024 x 1024</option>
+                <option value="1536x1024">1536 x 1024</option>
+                <option value="1024x1536">1024 x 1536</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>质量</span>
+              <select id="quality" name="quality">
+                <option value="low">low</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>背景</span>
+              <select id="background" name="background">
+                <option value="auto" selected>auto</option>
+                <option value="opaque">opaque</option>
+                <option value="transparent">transparent</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="actions">
+            <button id="submitButton" type="submit">开始生图</button>
+            <button id="downloadButton" type="button" disabled>下载 PNG</button>
+          </div>
+        </form>
+
+        <p id="status" class="status">准备就绪。</p>
+      </section>
+
+      <section class="panel preview-panel">
+        <div class="preview-head">
+          <span>结果预览</span>
+          <span id="meta"></span>
+        </div>
+        <div id="preview" class="preview empty">
+          <p>图片会显示在这里</p>
+        </div>
+        <div id="revisedPrompt" class="revised hidden"></div>
+      </section>
+    </main>
+
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

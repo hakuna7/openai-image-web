@@ -1,0 +1,14 @@
+{
+  "name": "openai-image-web",
+  "version": "1.0.0",
+  "description": "Local web app for generating images with your own OpenAI API key.",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "openai": "^6.1.0"
+  }
+}
