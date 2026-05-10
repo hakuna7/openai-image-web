@@ -9,7 +9,7 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 const serverApiKey = process.env.OPENAI_API_KEY || "";
-const serverBaseUrl = process.env.OPENAI_BASE_URL || "";
+const serverBaseUrl = process.env.OPENAI_BASE_URL || "https://lucen.cc/v1";
 const serverModel = process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
 
 app.use(express.json({ limit: "2mb" }));
@@ -46,9 +46,7 @@ app.post("/api/generate-image", async (req, res) => {
     typeof model === "string" && model.trim() ? model.trim() : serverModel;
 
   if (!resolvedApiKey) {
-    return res
-      .status(400)
-      .json({ error: "请先配置 API Key，或在页面中输入有效的 API Key。" });
+    return res.status(400).json({ error: "请先配置 API Key，或在页面中输入有效的 API Key。" });
   }
 
   if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
@@ -56,13 +54,10 @@ app.post("/api/generate-image", async (req, res) => {
   }
 
   try {
-    const clientOptions = { apiKey: resolvedApiKey };
-
-    if (resolvedBaseUrl) {
-      clientOptions.baseURL = resolvedBaseUrl;
-    }
-
-    const client = new OpenAI(clientOptions);
+    const client = new OpenAI({
+      apiKey: resolvedApiKey,
+      baseURL: resolvedBaseUrl
+    });
 
     const result = await client.images.generate({
       model: resolvedModel,

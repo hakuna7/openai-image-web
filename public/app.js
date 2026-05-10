@@ -7,8 +7,6 @@ const downloadButton = document.querySelector("#downloadButton");
 const submitButton = document.querySelector("#submitButton");
 const apiKeyFieldEl = document.querySelector("#apiKeyField");
 const apiKeyInputEl = document.querySelector("#apiKey");
-const baseUrlFieldEl = document.querySelector("#baseUrlField");
-const baseUrlInputEl = document.querySelector("#baseUrl");
 const modelInputEl = document.querySelector("#model");
 const serverKeyHintEl = document.querySelector("#serverKeyHint");
 const serverBaseUrlHintEl = document.querySelector("#serverBaseUrlHint");
@@ -23,7 +21,7 @@ function setStatus(message, isError = false) {
 function clearPreview() {
   latestImageUrl = "";
   previewEl.className = "preview empty";
-  previewEl.innerHTML = "<p>图片会显示在这里</p>";
+  previewEl.innerHTML = "<p>生成后的图片会出现在这里</p>";
   revisedPromptEl.classList.add("hidden");
   revisedPromptEl.textContent = "";
   metaEl.textContent = "";
@@ -34,7 +32,7 @@ function showImage(base64, promptText) {
   latestImageUrl = `data:image/png;base64,${base64}`;
   previewEl.className = "preview";
   previewEl.innerHTML = `<img src="${latestImageUrl}" alt="生成结果" />`;
-  metaEl.textContent = "已生成 1 张";
+  metaEl.textContent = "已生成";
 
   if (promptText) {
     revisedPromptEl.classList.remove("hidden");
@@ -60,10 +58,8 @@ async function loadConfig() {
     }
 
     if (data.hasServerBaseUrl) {
-      baseUrlFieldEl.classList.add("hidden");
       serverBaseUrlHintEl.classList.remove("hidden");
     } else {
-      baseUrlFieldEl.classList.remove("hidden");
       serverBaseUrlHintEl.classList.add("hidden");
     }
 
@@ -75,7 +71,6 @@ async function loadConfig() {
   } catch (error) {
     apiKeyFieldEl.classList.remove("hidden");
     apiKeyInputEl.required = true;
-    baseUrlFieldEl.classList.remove("hidden");
   }
 }
 
@@ -86,7 +81,7 @@ form.addEventListener("submit", async (event) => {
   const payload = Object.fromEntries(formData.entries());
 
   clearPreview();
-  setStatus("正在生成中，请稍等...");
+  setStatus("正在生成，请稍等...");
   submitButton.disabled = true;
   downloadButton.disabled = true;
 
