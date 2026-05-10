@@ -57,11 +57,14 @@
 
           <div class="option-grid">
             <label class="field">
-              <span>尺寸</span>
+              <span>比例</span>
               <select id="size" name="size">
-                <option value="1024x1024">方图 1024</option>
-                <option value="1536x1024">横图 1536</option>
-                <option value="1024x1536">竖图 1536</option>
+                <option value="1024x1024">1:1 方图</option>
+                <option value="1024x1536">9:16 竖屏</option>
+                <option value="1536x1024">16:9 横屏</option>
+                <option value="1024x1536">4:5 小红书/Instagram 近似</option>
+                <option value="1024x1536">3:4 头像/海报近似</option>
+                <option value="1536x1024">3:2 横版近似</option>
               </select>
             </label>
 
@@ -83,6 +86,8 @@
               </select>
             </label>
           </div>
+
+          <p class="microcopy">部分平台比例会使用最接近的官方支持尺寸生成。</p>
 
           <div class="actions">
             <button id="submitButton" class="primary-button" type="submit">生成图片</button>
