@@ -10,21 +10,92 @@ const app = express();
 const port = process.env.PORT || 3000;
 const serverApiKey = process.env.OPENAI_API_KEY || "";
 const serverBaseUrl = process.env.OPENAI_BASE_URL || "https://lucen.cc/v1";
-const serverModel = process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
+const serverImageModel = process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
+const serverTextModel = process.env.OPENAI_TEXT_MODEL || "gpt-4o-mini";
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "public")));
+
+function getResolvedClient({ apiKey, baseUrl }) {
+  const resolvedApiKey =
+    typeof apiKey === "string" && apiKey.trim() ? apiKey.trim() : serverApiKey;
+  const resolvedBaseUrl =
+    typeof baseUrl === "string" && baseUrl.trim() ? baseUrl.trim() : serverBaseUrl;
+
+  if (!resolvedApiKey) {
+    return {
+      error: "请先配置 API Key，或在页面中输入有效的 API Key。"
+    };
+  }
+
+  return {
+    client: new OpenAI({
+      apiKey: resolvedApiKey,
+      baseURL: resolvedBaseUrl
+    })
+  };
+}
 
 app.get("/api/config", (req, res) => {
   res.json({
     hasServerApiKey: Boolean(serverApiKey),
     hasServerBaseUrl: Boolean(serverBaseUrl),
-    serverModel
+    imageModel: serverImageModel,
+    textModel: serverTextModel
   });
 });
 
 app.get("/healthz", (req, res) => {
   res.status(200).json({ ok: true });
+});
+
+app.post("/api/optimize-prompt", async (req, res) => {
+  const { apiKey, baseUrl, prompt, model } = req.body ?? {};
+  const originalPrompt = typeof prompt === "string" ? prompt.trim() : "";
+  const resolvedModel =
+    typeof model === "string" && model.trim() ? model.trim() : serverTextModel;
+
+  if (!originalPrompt) {
+    return res.status(400).json({ error: "请输入要优化的提示词。" });
+  }
+
+  const { client, error } = getResolvedClient({ apiKey, baseUrl });
+
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  try {
+    const completion = await client.chat.completions.create({
+      model: resolvedModel,
+      messages: [
+        {
+          role: "system",
+          content:
+            "你是专业的 AI 生图提示词优化助手。把用户的想法改写成一段适合图片生成模型的中文提示词。只输出优化后的提示词，不要解释。"
+        },
+        {
+          role: "user",
+          content: `请优化这段生图提示词，保留原意并增强主体、场景、光线、镜头、风格和细节：${originalPrompt}`
+        }
+      ],
+      temperature: 0.8
+    });
+
+    const optimizedPrompt = completion.choices?.[0]?.message?.content?.trim();
+
+    if (!optimizedPrompt) {
+      return res.status(502).json({ error: "优化成功返回了空内容，请重试。" });
+    }
+
+    res.json({ optimizedPrompt });
+  } catch (error) {
+    const status = error?.status ?? 500;
+    const message =
+      error?.error?.message || error?.message || "提示词优化失败，请检查文本模型是否可用。";
+
+    res.status(status).json({ error: message });
+  }
 });
 
 app.post("/api/generate-image", async (req, res) => {
@@ -38,30 +109,24 @@ app.post("/api/generate-image", async (req, res) => {
     background = "auto"
   } = req.body ?? {};
 
-  const resolvedApiKey =
-    typeof apiKey === "string" && apiKey.trim() ? apiKey.trim() : serverApiKey;
-  const resolvedBaseUrl =
-    typeof baseUrl === "string" && baseUrl.trim() ? baseUrl.trim() : serverBaseUrl;
   const resolvedModel =
-    typeof model === "string" && model.trim() ? model.trim() : serverModel;
+    typeof model === "string" && model.trim() ? model.trim() : serverImageModel;
+  const cleanPrompt = typeof prompt === "string" ? prompt.trim() : "";
 
-  if (!resolvedApiKey) {
-    return res.status(400).json({ error: "请先配置 API Key，或在页面中输入有效的 API Key。" });
-  }
-
-  if (!prompt || typeof prompt !== "string" || !prompt.trim()) {
+  if (!cleanPrompt) {
     return res.status(400).json({ error: "请输入图片提示词。" });
   }
 
-  try {
-    const client = new OpenAI({
-      apiKey: resolvedApiKey,
-      baseURL: resolvedBaseUrl
-    });
+  const { client, error } = getResolvedClient({ apiKey, baseUrl });
 
+  if (error) {
+    return res.status(400).json({ error });
+  }
+
+  try {
     const result = await client.images.generate({
       model: resolvedModel,
-      prompt: prompt.trim(),
+      prompt: cleanPrompt,
       size,
       quality,
       background

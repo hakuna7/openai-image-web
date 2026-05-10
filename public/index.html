@@ -32,10 +32,13 @@
           </label>
 
           <input id="baseUrl" name="baseUrl" type="hidden" value="https://lucen.cc/v1" />
-          <input id="model" name="model" type="hidden" value="gpt-image-2" />
+          <input id="imageModel" name="model" type="hidden" value="gpt-image-2" />
+          <input id="textModel" type="hidden" value="gpt-4o-mini" />
 
-          <p id="serverKeyHint" class="hint hidden">服务端已配置 Key。</p>
-          <p id="serverBaseUrlHint" class="hint hidden">已连接中转站。</p>
+          <div class="hint-row">
+            <p id="serverKeyHint" class="hint hidden">服务端已配置 Key。</p>
+            <p id="serverBaseUrlHint" class="hint hidden">已连接中转站。</p>
+          </div>
 
           <label class="field prompt-field">
             <span>提示词</span>
@@ -47,6 +50,10 @@
               required
             ></textarea>
           </label>
+
+          <div class="prompt-tools">
+            <button id="optimizeButton" class="soft-button" type="button">优化提示词</button>
+          </div>
 
           <div class="option-grid">
             <label class="field">
@@ -79,6 +86,7 @@
 
           <div class="actions">
             <button id="submitButton" class="primary-button" type="submit">生成图片</button>
+            <button id="cancelButton" class="danger-button hidden" type="button">中止</button>
             <button id="downloadButton" class="secondary-button" type="button" disabled>
               下载
             </button>
@@ -97,6 +105,15 @@
           <p>生成后的图片会出现在这里</p>
         </div>
         <div id="revisedPrompt" class="revised hidden"></div>
+        <div class="history-panel">
+          <div class="history-head">
+            <span>最近生成</span>
+            <button id="clearHistoryButton" class="text-button" type="button" disabled>清空</button>
+          </div>
+          <div id="historyGrid" class="history-grid empty">
+            <p>还没有历史图片</p>
+          </div>
+        </div>
       </section>
     </main>
 
