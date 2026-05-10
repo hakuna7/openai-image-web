@@ -163,11 +163,6 @@ select:focus {
   gap: 8px;
 }
 
-.prompt-tools {
-  display: flex;
-  justify-content: flex-end;
-}
-
 .option-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -220,17 +215,6 @@ button:disabled {
 .secondary-button {
   background: #e8e8ed;
   color: var(--text);
-}
-
-.soft-button {
-  min-height: 38px;
-  padding: 0 16px;
-  background: rgba(0, 113, 227, 0.08);
-  color: var(--blue);
-}
-
-.soft-button:hover:not(:disabled) {
-  background: rgba(0, 113, 227, 0.12);
 }
 
 .danger-button {
@@ -469,10 +453,6 @@ button:disabled {
   .option-grid,
   .actions {
     grid-template-columns: 1fr;
-  }
-
-  .prompt-tools {
-    justify-content: stretch;
   }
 
   .preview {

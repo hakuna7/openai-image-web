@@ -11,19 +11,32 @@ const downloadButton = document.querySelector("#downloadButton");
 const clearHistoryButton = document.querySelector("#clearHistoryButton");
 const submitButton = document.querySelector("#submitButton");
 const cancelButton = document.querySelector("#cancelButton");
-const optimizeButton = document.querySelector("#optimizeButton");
 const apiKeyFieldEl = document.querySelector("#apiKeyField");
 const apiKeyInputEl = document.querySelector("#apiKey");
 const baseUrlInputEl = document.querySelector("#baseUrl");
 const imageModelInputEl = document.querySelector("#imageModel");
-const textModelInputEl = document.querySelector("#textModel");
-const promptInputEl = document.querySelector("#prompt");
 const serverKeyHintEl = document.querySelector("#serverKeyHint");
 const serverBaseUrlHintEl = document.querySelector("#serverBaseUrlHint");
 
 let latestImageUrl = "";
 let activeGenerateController = null;
 const imageHistory = [];
+
+function normalizeImageModel(model) {
+  const cleanModel = typeof model === "string" ? model.trim() : "";
+
+  if (!cleanModel) {
+    return "gpt-image-2";
+  }
+
+  const looseModel = cleanModel.toLowerCase().replace(/[\s_-]/g, "");
+
+  if (looseModel === "gptimage2" || looseModel === "gptimge2") {
+    return "gpt-image-2";
+  }
+
+  return cleanModel;
+}
 
 function setStatus(message, isError = false) {
   statusEl.textContent = message;
@@ -32,7 +45,6 @@ function setStatus(message, isError = false) {
 
 function setGenerating(isGenerating) {
   submitButton.disabled = isGenerating;
-  optimizeButton.disabled = isGenerating;
   cancelButton.classList.toggle("hidden", !isGenerating);
 }
 
@@ -110,13 +122,6 @@ function closeLightbox() {
   lightboxImageEl.removeAttribute("src");
 }
 
-function getSharedPayload() {
-  return {
-    apiKey: apiKeyInputEl.value,
-    baseUrl: baseUrlInputEl.value
-  };
-}
-
 async function loadConfig() {
   try {
     const response = await fetch("/api/config");
@@ -135,11 +140,7 @@ async function loadConfig() {
     serverBaseUrlHintEl.classList.toggle("hidden", !data.hasServerBaseUrl);
 
     if (data.imageModel) {
-      imageModelInputEl.value = data.imageModel;
-    }
-
-    if (data.textModel) {
-      textModelInputEl.value = data.textModel;
+      imageModelInputEl.value = normalizeImageModel(data.imageModel);
     }
 
     setStatus("准备就绪。");
@@ -148,46 +149,6 @@ async function loadConfig() {
     apiKeyInputEl.required = true;
   }
 }
-
-optimizeButton.addEventListener("click", async () => {
-  const prompt = promptInputEl.value.trim();
-
-  if (!prompt) {
-    setStatus("请先输入要优化的提示词。", true);
-    promptInputEl.focus();
-    return;
-  }
-
-  optimizeButton.disabled = true;
-  setStatus("正在优化提示词...");
-
-  try {
-    const response = await fetch("/api/optimize-prompt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        ...getSharedPayload(),
-        model: textModelInputEl.value,
-        prompt
-      })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || "优化失败。");
-    }
-
-    promptInputEl.value = data.optimizedPrompt;
-    setStatus(data.fallback ? "文本模型暂时不可用，已使用本地优化。" : "提示词已优化。");
-  } catch (error) {
-    setStatus(error.message || "优化失败。", true);
-  } finally {
-    optimizeButton.disabled = false;
-  }
-});
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
