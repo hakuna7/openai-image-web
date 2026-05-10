@@ -28,8 +28,35 @@
             />
           </label>
 
+          <label id="baseUrlField" class="field">
+            <span>Base URL（中转站接口地址）</span>
+            <input
+              id="baseUrl"
+              name="baseUrl"
+              type="text"
+              placeholder="例如：https://你的中转站域名/v1"
+              autocomplete="off"
+            />
+          </label>
+
+          <label id="modelField" class="field">
+            <span>模型名</span>
+            <input
+              id="model"
+              name="model"
+              type="text"
+              value="gpt-image-2"
+              placeholder="例如：gpt-image-2"
+              autocomplete="off"
+            />
+          </label>
+
           <p id="serverKeyHint" class="server-key-hint hidden">
             当前服务端已配置 API Key，你可以直接生图，不需要在网页里再填写。
+          </p>
+
+          <p id="serverBaseUrlHint" class="server-key-hint hidden">
+            当前服务端已配置 Base URL，你可以直接生图，不需要在网页里再填写中转站地址。
           </p>
 
           <label class="field">

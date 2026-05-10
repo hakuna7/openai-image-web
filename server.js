@@ -9,13 +9,17 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
 const serverApiKey = process.env.OPENAI_API_KEY || "";
+const serverBaseUrl = process.env.OPENAI_BASE_URL || "";
+const serverModel = process.env.OPENAI_IMAGE_MODEL || "gpt-image-2";
 
 app.use(express.json({ limit: "2mb" }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.get("/api/config", (req, res) => {
   res.json({
-    hasServerApiKey: Boolean(serverApiKey)
+    hasServerApiKey: Boolean(serverApiKey),
+    hasServerBaseUrl: Boolean(serverBaseUrl),
+    serverModel
   });
 });
 
@@ -26,6 +30,8 @@ app.get("/healthz", (req, res) => {
 app.post("/api/generate-image", async (req, res) => {
   const {
     apiKey,
+    baseUrl,
+    model,
     prompt,
     size = "1024x1024",
     quality = "medium",
@@ -34,6 +40,10 @@ app.post("/api/generate-image", async (req, res) => {
 
   const resolvedApiKey =
     typeof apiKey === "string" && apiKey.trim() ? apiKey.trim() : serverApiKey;
+  const resolvedBaseUrl =
+    typeof baseUrl === "string" && baseUrl.trim() ? baseUrl.trim() : serverBaseUrl;
+  const resolvedModel =
+    typeof model === "string" && model.trim() ? model.trim() : serverModel;
 
   if (!resolvedApiKey) {
     return res
@@ -46,10 +56,16 @@ app.post("/api/generate-image", async (req, res) => {
   }
 
   try {
-    const client = new OpenAI({ apiKey: resolvedApiKey });
+    const clientOptions = { apiKey: resolvedApiKey };
+
+    if (resolvedBaseUrl) {
+      clientOptions.baseURL = resolvedBaseUrl;
+    }
+
+    const client = new OpenAI(clientOptions);
 
     const result = await client.images.generate({
-      model: "gpt-image-2",
+      model: resolvedModel,
       prompt: prompt.trim(),
       size,
       quality,

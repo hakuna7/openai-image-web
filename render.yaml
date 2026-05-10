@@ -9,3 +9,7 @@ services:
     envVars:
       - key: OPENAI_API_KEY
         sync: false
+      - key: OPENAI_BASE_URL
+        sync: false
+      - key: OPENAI_IMAGE_MODEL
+        sync: false

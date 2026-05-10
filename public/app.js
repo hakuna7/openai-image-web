@@ -7,7 +7,11 @@ const downloadButton = document.querySelector("#downloadButton");
 const submitButton = document.querySelector("#submitButton");
 const apiKeyFieldEl = document.querySelector("#apiKeyField");
 const apiKeyInputEl = document.querySelector("#apiKey");
+const baseUrlFieldEl = document.querySelector("#baseUrlField");
+const baseUrlInputEl = document.querySelector("#baseUrl");
+const modelInputEl = document.querySelector("#model");
 const serverKeyHintEl = document.querySelector("#serverKeyHint");
+const serverBaseUrlHintEl = document.querySelector("#serverBaseUrlHint");
 
 let latestImageUrl = "";
 
@@ -49,16 +53,29 @@ async function loadConfig() {
       apiKeyFieldEl.classList.add("hidden");
       serverKeyHintEl.classList.remove("hidden");
       apiKeyInputEl.required = false;
-      setStatus("服务端已配置 API Key，准备就绪。");
-      return;
+    } else {
+      apiKeyFieldEl.classList.remove("hidden");
+      serverKeyHintEl.classList.add("hidden");
+      apiKeyInputEl.required = true;
     }
 
-    apiKeyFieldEl.classList.remove("hidden");
-    serverKeyHintEl.classList.add("hidden");
-    apiKeyInputEl.required = true;
+    if (data.hasServerBaseUrl) {
+      baseUrlFieldEl.classList.add("hidden");
+      serverBaseUrlHintEl.classList.remove("hidden");
+    } else {
+      baseUrlFieldEl.classList.remove("hidden");
+      serverBaseUrlHintEl.classList.add("hidden");
+    }
+
+    if (data.serverModel) {
+      modelInputEl.value = data.serverModel;
+    }
+
+    setStatus("准备就绪。");
   } catch (error) {
     apiKeyFieldEl.classList.remove("hidden");
     apiKeyInputEl.required = true;
+    baseUrlFieldEl.classList.remove("hidden");
   }
 }
 

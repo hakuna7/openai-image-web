@@ -28,13 +28,19 @@ Start Command: npm start
 
 ```text
 OPENAI_API_KEY=你的_OpenAI_API_Key
+OPENAI_BASE_URL=你的中转站接口地址
+OPENAI_IMAGE_MODEL=图片模型名
 ```
 
 7. 部署完成后，打开 Render 分配给你的 `https://xxxx.onrender.com`
 
 ## 说明
 
+- 如果你用的是中转站，并且它兼容 OpenAI 接口，可以配置：
+  - `OPENAI_API_KEY`
+  - `OPENAI_BASE_URL`
+  - `OPENAI_IMAGE_MODEL`
 - 如果服务端配置了 `OPENAI_API_KEY`，网页里就不需要再手动输入 Key
 - 如果服务端没配置，仍然可以在网页里临时输入 Key
-- 当前模型配置为 `gpt-image-2`
+- 默认模型配置为 `gpt-image-2`
 - 生成后可以直接在页面预览并下载 PNG

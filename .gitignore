@@ -1,3 +1,8 @@
 node_modules
 server.log
 server-error.log
+render-helper.log
+render-helper-error.log
+chrome-profile
+render-chrome-profile
+render-playwright-profile
