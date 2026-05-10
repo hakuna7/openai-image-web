@@ -285,6 +285,10 @@ button:disabled {
     repeating-linear-gradient(45deg, #f1f1f3 0 16px, #fafafa 16px 32px);
 }
 
+.preview:not(.empty) {
+  cursor: zoom-in;
+}
+
 .preview.empty p {
   width: min(260px, 80%);
   margin: 0;
@@ -395,6 +399,36 @@ button:disabled {
 
 .history-download:hover {
   color: var(--blue-dark);
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: 72px 24px 28px;
+  background: rgba(245, 245, 247, 0.78);
+  backdrop-filter: blur(28px) saturate(150%);
+}
+
+.lightbox img {
+  max-width: min(100%, 1200px);
+  max-height: 100%;
+  border-radius: 18px;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.22);
+  object-fit: contain;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 22px;
+  right: 22px;
+  min-height: 40px;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--text);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
 }
 
 .hidden {

@@ -4,6 +4,9 @@ const previewEl = document.querySelector("#preview");
 const revisedPromptEl = document.querySelector("#revisedPrompt");
 const metaEl = document.querySelector("#meta");
 const historyGridEl = document.querySelector("#historyGrid");
+const lightboxEl = document.querySelector("#lightbox");
+const lightboxImageEl = document.querySelector("#lightboxImage");
+const closeLightboxButton = document.querySelector("#closeLightboxButton");
 const downloadButton = document.querySelector("#downloadButton");
 const clearHistoryButton = document.querySelector("#clearHistoryButton");
 const submitButton = document.querySelector("#submitButton");
@@ -92,6 +95,21 @@ function addToHistory(url) {
   renderHistory();
 }
 
+function openLightbox(url) {
+  if (!url) {
+    return;
+  }
+
+  lightboxImageEl.src = url;
+  lightboxEl.classList.remove("hidden");
+  closeLightboxButton.focus();
+}
+
+function closeLightbox() {
+  lightboxEl.classList.add("hidden");
+  lightboxImageEl.removeAttribute("src");
+}
+
 function getSharedPayload() {
   return {
     apiKey: apiKeyInputEl.value,
@@ -163,7 +181,7 @@ optimizeButton.addEventListener("click", async () => {
     }
 
     promptInputEl.value = data.optimizedPrompt;
-    setStatus("提示词已优化。");
+    setStatus(data.fallback ? "文本模型暂时不可用，已使用本地优化。" : "提示词已优化。");
   } catch (error) {
     setStatus(error.message || "优化失败。", true);
   } finally {
@@ -232,6 +250,10 @@ downloadButton.addEventListener("click", () => {
   link.click();
 });
 
+previewEl.addEventListener("click", () => {
+  openLightbox(latestImageUrl);
+});
+
 historyGridEl.addEventListener("click", (event) => {
   const button = event.target.closest("[data-history-index]");
 
@@ -250,11 +272,26 @@ historyGridEl.addEventListener("click", (event) => {
   previewEl.innerHTML = `<img src="${latestImageUrl}" alt="历史生成预览" />`;
   metaEl.textContent = "历史预览";
   downloadButton.disabled = false;
+  openLightbox(latestImageUrl);
 });
 
 clearHistoryButton.addEventListener("click", () => {
   imageHistory.length = 0;
   renderHistory();
+});
+
+closeLightboxButton.addEventListener("click", closeLightbox);
+
+lightboxEl.addEventListener("click", (event) => {
+  if (event.target === lightboxEl) {
+    closeLightbox();
+  }
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !lightboxEl.classList.contains("hidden")) {
+    closeLightbox();
+  }
 });
 
 loadConfig();

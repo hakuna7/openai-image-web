@@ -36,6 +36,24 @@ function getResolvedClient({ apiKey, baseUrl }) {
   };
 }
 
+function buildFallbackPrompt(prompt) {
+  return [
+    prompt,
+    "主体清晰，画面干净，构图平衡，细节丰富",
+    "自然光影，真实材质，高质量画面，电影感镜头",
+    "避免文字水印、畸形结构、低清晰度、过度噪点"
+  ].join("，");
+}
+
+function withTimeout(promise, timeoutMs) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("文本模型响应超时")), timeoutMs);
+    })
+  ]);
+}
+
 app.get("/api/config", (req, res) => {
   res.json({
     hasServerApiKey: Boolean(serverApiKey),
@@ -66,21 +84,24 @@ app.post("/api/optimize-prompt", async (req, res) => {
   }
 
   try {
-    const completion = await client.chat.completions.create({
-      model: resolvedModel,
-      messages: [
-        {
-          role: "system",
-          content:
-            "你是专业的 AI 生图提示词优化助手。把用户的想法改写成一段适合图片生成模型的中文提示词。只输出优化后的提示词，不要解释。"
-        },
-        {
-          role: "user",
-          content: `请优化这段生图提示词，保留原意并增强主体、场景、光线、镜头、风格和细节：${originalPrompt}`
-        }
-      ],
-      temperature: 0.8
-    });
+    const completion = await withTimeout(
+      client.chat.completions.create({
+        model: resolvedModel,
+        messages: [
+          {
+            role: "system",
+            content:
+              "你是专业的 AI 生图提示词优化助手。把用户的想法改写成一段适合图片生成模型的中文提示词。只输出优化后的提示词，不要解释。"
+          },
+          {
+            role: "user",
+            content: `请优化这段生图提示词，保留原意并增强主体、场景、光线、镜头、风格和细节：${originalPrompt}`
+          }
+        ],
+        temperature: 0.8
+      }),
+      12000
+    );
 
     const optimizedPrompt = completion.choices?.[0]?.message?.content?.trim();
 
@@ -90,11 +111,11 @@ app.post("/api/optimize-prompt", async (req, res) => {
 
     res.json({ optimizedPrompt });
   } catch (error) {
-    const status = error?.status ?? 500;
-    const message =
-      error?.error?.message || error?.message || "提示词优化失败，请检查文本模型是否可用。";
-
-    res.status(status).json({ error: message });
+    res.json({
+      optimizedPrompt: buildFallbackPrompt(originalPrompt),
+      fallback: true,
+      warning: error?.error?.message || error?.message || "文本模型暂时不可用，已使用本地优化。"
+    });
   }
 });
 
